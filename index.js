@@ -67,6 +67,11 @@ async function main() {
 
     console.info("escrow create execution result: ", create_result);
 
+    // Query the escrow before approving it, since approve removes it from the contract
+    const client = await CosmWasmClient.connect(rpcEndpoint);
+    const query_result = await client.queryContractSmart(contractAddress, { details: { id: escrow_id } });
+    console.info("query result", query_result);
+
     // Approve
     const arbiter_wallet = await DirectSecp256k1HdWallet.fromMnemonic(arbiter.mnemonic, { prefix: "wasm" });
     const arbiter_client = await SigningCosmWasmClient.connectWithSigner(rpcEndpoint, arbiter_wallet);
@@ -81,11 +86,6 @@ async function main() {
         executeFee,
     );
     console.info("escrow approve result: ", approve_result);
-
-	// query
-	const client = await CosmWasmClient.connect(rpcEndpoint);
-	const query_result = await client.queryContractSmart(contractAddress, {details:{id: "foo1"}});
-	console.info("query result", query_result);
 }
 
 main();
